@@ -3,7 +3,7 @@
 Full featured universal (iOS, macOS, iPadOS) app showcasing the Rick and Morty API.
 
 
-![Rick & Morty App: iOS Academy](https://raw.githubusercontent.com/AfrazCodes/RickAndMortyiOSApp/main/cover.png)
+![Rick & Morty App: ](https://raw.githubusercontent.com/AfrazCodes/RickAndMortyiOSApp/main/cover.png)
 
 ## Overview
 - Written in Swift
@@ -18,7 +18,7 @@ Full featured universal (iOS, macOS, iPadOS) app showcasing the Rick and Morty A
 
 ## Design
 
-The app has five key area that we will build out step-by-step
+The app has five key area:
 
 1. Characters
 2. Locations

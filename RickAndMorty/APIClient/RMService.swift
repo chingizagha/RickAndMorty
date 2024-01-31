@@ -39,7 +39,15 @@ final class RMService {
                 completion(.failure(error ?? RMServiceError.failedToGetData ))
                 return
             }
+            
+            do{
+                let result = try JSONDecoder().decode(type.self, from: data)
+                completion(.success(result))
+            } catch {
+                completion(.failure(error))
+            }
         }
+        task.resume()
     }
     
     private func request(from rmRequest: RMRequest) -> URLRequest?{

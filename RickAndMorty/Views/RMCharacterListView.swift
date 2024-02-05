@@ -97,5 +97,9 @@ extension RMCharacterListView: RMCharacterListViewViewModelDelegate {
         delegate?.rmCharacterView(self, didSelectCharacter: character)
     }
     
+    func didLoadMoreCharacters(with count: Int) {
+        <#code#>
+    }
+    
     
 }

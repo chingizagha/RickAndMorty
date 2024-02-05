@@ -157,6 +157,7 @@
 			isa = PBXGroup;
 			children = (
 				72A462262B6AA15F0040D6B3 /* RMCharacterListView.swift */,
+				72384FF82B6C1165004BCF37 /* RMFooterLoadingCollectionReusableView.swift */,
 				72A4622A2B6AB3910040D6B3 /* RMCharacterCollectionViewCell.swift */,
 				72384FF42B6C084A004BCF37 /* RMCharacterDetailView.swift */,
 			);
@@ -178,7 +179,6 @@
 				72A462232B6AA0CE0040D6B3 /* RMCharacterListViewViewModel.swift */,
 				72A4622C2B6AB51E0040D6B3 /* RMCharacterCollectionViewCellViewModel.swift */,
 				72384FF62B6C0872004BCF37 /* RMCharacterDetailViewViewModel.swift */,
-				72384FF82B6C1165004BCF37 /* RMFooterLoadingCollectionReusableView.swift */,
 			);
 			path = ViewModels;
 			sourceTree = "<group>";

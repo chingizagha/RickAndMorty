@@ -97,8 +97,10 @@ extension RMCharacterListView: RMCharacterListViewViewModelDelegate {
         delegate?.rmCharacterView(self, didSelectCharacter: character)
     }
     
-    func didLoadMoreCharacters(with count: Int) {
-        <#code#>
+    func didLoadMoreCharacters(with newIndexPaths: [IndexPath]) {
+        collectionView.performBatchUpdates({
+            self.collectionView.insertItems(at: newIndexPaths)
+        })
     }
     
     

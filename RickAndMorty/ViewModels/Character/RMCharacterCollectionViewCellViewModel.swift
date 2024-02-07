@@ -27,10 +27,10 @@ final class RMCharacterCollectionViewCellViewModel: Hashable, Equatable{
         characterName: String,
         characterStatus: RMCharacterStatus,
         characterImageURL: URL? ){
-        self.characterName = characterName
-        self.characterStatus = characterStatus
-        self.characterImageURL = characterImageURL
-    }
+            self.characterName = characterName
+            self.characterStatus = characterStatus
+            self.characterImageURL = characterImageURL
+        }
     
     public var characterStatusText: String{
         return "Status: \(characterStatus.text)"
@@ -41,16 +41,6 @@ final class RMCharacterCollectionViewCellViewModel: Hashable, Equatable{
             completions(.failure(URLError(.badURL)))
             return
         }
-        
-        let request = URLRequest(url: url)
-        let task = URLSession.shared.dataTask(with: request) {data, _, error in
-            guard let data = data, error == nil else {
-                completions(.failure(error ?? URLError(.badServerResponse)))
-                return
-            }
-            
-            completions(.success(data))
-        }
-        task.resume()
+        RMImageLoader.shared.downloadImage(url, completions: completions)
     }
 }

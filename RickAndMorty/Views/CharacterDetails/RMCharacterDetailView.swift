@@ -79,9 +79,7 @@ final class RMCharacterDetailView: UIView {
         case .episodes:
             return viewModel.createEpisodeSectionLayout()
         }
-        
-        
-            }
+    }
     
    
     

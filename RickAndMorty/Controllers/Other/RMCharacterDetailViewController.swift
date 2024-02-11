@@ -78,22 +78,33 @@ extension RMCharacterDetailViewController: UICollectionViewDelegate, UICollectio
                 fatalError()
             }
             cell.configure(viewModel: viewModel)
-            cell.backgroundColor = .systemBlue
             return cell
         case .information(let viewModels):
             guard let cell = collectionView.dequeueReusableCell(withReuseIdentifier: RMCharacterInformationCollectionViewCell.cellIdentifier, for: indexPath) as? RMCharacterInformationCollectionViewCell else {
                 fatalError()
             }
             cell.configure(viewModel: viewModels[indexPath.row])
-            cell.backgroundColor = .systemRed
             return cell
         case .episodes(let viewModels):
             guard let cell = collectionView.dequeueReusableCell(withReuseIdentifier: RMCharacterEpisodeCollectionViewCell.cellIdentifier, for: indexPath) as? RMCharacterEpisodeCollectionViewCell else {
                 fatalError()
             }
             cell.configure(viewModel: viewModels[indexPath.row])
-            cell.backgroundColor = .systemOrange
             return cell
         }
+    }
+    
+    func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
+        let sectinonType = viewModel.sections[indexPath.section]
+        switch sectinonType{
+        case .photo, .information:
+            break
+        case .episodes:
+            let episodes = self.viewModel.episodes
+            let selection = episodes[indexPath.row]
+            let vc = RMEpisodeDetailViewController(url: URL(string: selection))
+            navigationController?.pushViewController(vc, animated: true)
+        }
+
     }
 }

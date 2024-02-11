@@ -8,7 +8,9 @@
 import UIKit
 
 /// Controller to show and search for Locations
-final class RMLocationViewController: UIViewController {
+final class RMLocationViewController: UIViewController, RMLocationListViewDelegate {
+    
+    private let locationListView = RMLocationListView()
 
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -16,6 +18,7 @@ final class RMLocationViewController: UIViewController {
         view.backgroundColor = .systemBackground
         title = "Locations"
         
+        setUpView()
         addSearchButton()
     }
     
@@ -23,10 +26,24 @@ final class RMLocationViewController: UIViewController {
         navigationItem.rightBarButtonItem = UIBarButtonItem(barButtonSystemItem: .search, target: self, action: #selector(didTapSearch))
     }
     
+    private func setUpView() {
+        view.addSubview(locationListView)
+        NSLayoutConstraint.activate([
+            locationListView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor),
+            locationListView.rightAnchor.constraint(equalTo: view.safeAreaLayoutGuide.rightAnchor),
+            locationListView.leftAnchor.constraint(equalTo: view.safeAreaLayoutGuide.leftAnchor),
+            locationListView.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor)
+        ])
+    }
+    
     @objc func didTapSearch() {
-        let vc = RMSearchViewController(config: .init(type: .character))
-        vc.navigationItem.largeTitleDisplayMode = .never
-        navigationController?.pushViewController(vc, animated: true)
+        
+    }
+    
+    func rmLocationView(_ locationListView: RMLocationListView, didSelectLocation location: RMLocation) {
+        let detailVC = RMLocationDetailViewController()
+        detailVC.navigationItem.largeTitleDisplayMode = .never
+        navigationController?.pushViewController(detailVC, animated: true)
     }
     
 

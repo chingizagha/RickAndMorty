@@ -1,87 +1,70 @@
 //
-//  RMEpisodeListViewViewModel.swift
+//  RMLocationListViewViewModel.swift
 //  RickAndMorty
 //
-//  Created by Chingiz on 10.02.24.
+//  Created by Chingiz on 11.02.24.
 //
+
 
 import UIKit
 
-protocol RMEpisodeListViewViewModelDelegate: AnyObject{
-    func didLoadInitialEpisodes()
-    func didLoadMoreEpisodes(with newIndexPaths: [IndexPath])
-    func didSelectEpisode(_ episode: RMEpisode)
+protocol RMLocationListViewViewModelDelegate: AnyObject{
+    func didLoadInitialLocations()
+    func didLoadMoreLocations(with newIndexPaths: [IndexPath])
+    func didSelectLocation(_ location: RMLocation)
 }
 
-/// View model to handling character list view logic
-final class RMEpisodeListViewViewModel: NSObject {
+final class RMLocationListViewViewModel: NSObject {
     
-    public weak var delegate: RMEpisodeListViewViewModelDelegate?
+    public weak var delegate: RMLocationListViewViewModelDelegate?
     
-    private var isLoadingMoreEpisodes = false
+    private var isLoadMoreLocations = false
     
-    private let borderColors: [UIColor] = [
-        .systemBlue,
-        .systemRed,
-        .systemOrange,
-        .systemPink,
-        .systemPurple,
-        .systemGreen,
-        .systemYellow,
-        .systemIndigo,
-        .systemMint
-    ]
-    
-    private var episodes: [RMEpisode] = [] {
+    private var locations: [RMLocation] = [] {
         didSet{
-            for episode in episodes {
-                let viewModel = RMEpisodeCollectionViewCellViewModel(
-                    episodeDataUrl: URL(string: episode.url),
-                    borderColor: borderColors.randomElement() ?? .systemBlue)
+            for location in locations {
+                let viewModel = RMLocationCollectionViewCellViewModel(locationName: location.name, locationType: location.type, locationDimension: location.dimension)
+                
                 if !cellViewModels.contains(viewModel){
                     cellViewModels.append(viewModel)
                 }
-                    
             }
         }
     }
     
-    private var cellViewModels: [RMEpisodeCollectionViewCellViewModel] = []
+    private var cellViewModels: [RMLocationCollectionViewCellViewModel] = []
     
-    private var apiInfo: RMGetAllEpisodesResponse.Info? = nil
+    private var apiInfo: RMGetAllLocationsResponse.Info? = nil
     
-    /// Fetch inital of episodes (20)
-    func fetchEpisodes() {
-        RMService.shared.execute(.listEpisodesRequest, expecting: RMGetAllEpisodesResponse.self) { [weak self] result in
+    func fetchLocation() {
+        RMService.shared.execute(.listLocationsRequest, expecting: RMGetAllLocationsResponse.self) { [weak self] result in
             switch result {
             case .success(let responseModel):
                 let results = responseModel.results
                 let info = responseModel.info
-                self?.episodes = results
+                self?.locations = results
                 self?.apiInfo = info
-                DispatchQueue.main.async{
-                    self?.delegate?.didLoadInitialEpisodes()
+                DispatchQueue.main.async {
+                    self?.delegate?.didLoadInitialLocations()
                 }
             case .failure(let error):
                 print(String(describing: error))
-                    
             }
         }
     }
     
-    /// Paginate additional episodes if needed
     public func fetchAdditionalEpisodes(url: URL) {
-        guard !isLoadingMoreEpisodes else {
+        guard !isLoadMoreLocations else {
             return
         }
-        isLoadingMoreEpisodes = true
+        isLoadMoreLocations = true
         guard let request = RMRequest(url: url) else {
-            isLoadingMoreEpisodes = false
+            isLoadMoreLocations = false
             return
         }
         
         RMService.shared.execute(request,
-                                 expecting: RMGetAllEpisodesResponse.self) { [weak self] result in
+                                 expecting: RMGetAllLocationsResponse.self) { [weak self] result in
             
             guard let strongSelf = self else {
                 return
@@ -92,7 +75,7 @@ final class RMEpisodeListViewViewModel: NSObject {
                 let info = responseModel.info
                 strongSelf.apiInfo = info
                 
-                let originalCount = strongSelf.episodes.count
+                let originalCount = strongSelf.locations.count
                 let newCount = moreResults.count
                 let total = originalCount + newCount
                 let startingIndex = total - newCount
@@ -100,14 +83,14 @@ final class RMEpisodeListViewViewModel: NSObject {
                     return IndexPath(row: $0, section: 0)
                 })
                 
-                strongSelf.episodes.append(contentsOf: moreResults)
+                strongSelf.locations.append(contentsOf: moreResults)
                 DispatchQueue.main.async{
-                    strongSelf.delegate?.didLoadMoreEpisodes(with: indexPathsToAdd)
-                    strongSelf.isLoadingMoreEpisodes = false
+                    strongSelf.delegate?.didLoadMoreLocations(with: indexPathsToAdd)
+                    strongSelf.isLoadMoreLocations = false
                 }
             case .failure(let error):
                 print(String(describing: error))
-                strongSelf.isLoadingMoreEpisodes = false
+                strongSelf.isLoadMoreLocations = false
             }
         }
     }
@@ -115,28 +98,25 @@ final class RMEpisodeListViewViewModel: NSObject {
     public var shouldShowLoadMoreIndicator: Bool {
         return apiInfo?.next != nil
     }
-    
 }
 
-
-extension RMEpisodeListViewViewModel: UICollectionViewDataSource, UICollectionViewDelegate, UICollectionViewDelegateFlowLayout{
+extension RMLocationListViewViewModel: UICollectionViewDelegate, UICollectionViewDataSource, UICollectionViewDelegateFlowLayout {
     
     func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
         return cellViewModels.count
     }
     
-    
-    ///Collection View Footer init
+    // Footer init
     func collectionView(_ collectionView: UICollectionView, viewForSupplementaryElementOfKind kind: String, at indexPath: IndexPath) -> UICollectionReusableView {
         guard kind == UICollectionView.elementKindSectionFooter,
               let footer = collectionView.dequeueReusableSupplementaryView(ofKind: kind, withReuseIdentifier: RMFooterLoadingCollectionReusableView.identifier, for: indexPath) as? RMFooterLoadingCollectionReusableView else {
             fatalError("Unsupported")
         }
+        
         footer.startAnimating()
         return footer
     }
-        
-    /// Collection View Footer size
+    
     func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, referenceSizeForFooterInSection section: Int) -> CGSize {
         guard shouldShowLoadMoreIndicator else {
             return .zero
@@ -146,11 +126,13 @@ extension RMEpisodeListViewViewModel: UICollectionViewDataSource, UICollectionVi
     }
     
     func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
-        guard let cell = collectionView.dequeueReusableCell(withReuseIdentifier: RMEpisodeCollectionViewCell.cellIdentifier, for: indexPath) as? RMEpisodeCollectionViewCell else {
-            fatalError("Unsupported cell")
+        guard let cell = collectionView.dequeueReusableCell(withReuseIdentifier: RMLocationCollectionViewCell.cellIdentifier, for: indexPath) as? RMLocationCollectionViewCell else {
+            fatalError("Unsupported")
         }
+        
         cell.configure(with: cellViewModels[indexPath.row])
         return cell
+        
     }
     
     func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, sizeForItemAt indexPath: IndexPath) -> CGSize {
@@ -161,17 +143,15 @@ extension RMEpisodeListViewViewModel: UICollectionViewDataSource, UICollectionVi
     
     func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
         collectionView.deselectItem(at: indexPath, animated: true)
-        let episode = episodes[indexPath.row]
-        delegate?.didSelectEpisode(episode)
+        let location = locations[indexPath.row]
+        delegate?.didSelectLocation(location)
     }
-    
-    
 }
 
-extension RMEpisodeListViewViewModel: UIScrollViewDelegate{
+extension RMLocationListViewViewModel: UIScrollViewDelegate {
     func scrollViewDidScroll(_ scrollView: UIScrollView) {
         guard shouldShowLoadMoreIndicator,
-              !isLoadingMoreEpisodes,
+              !isLoadMoreLocations,
               !cellViewModels.isEmpty,
               let nextUrlString = apiInfo?.next,
               let url = URL(string: nextUrlString) else {return}
@@ -180,11 +160,10 @@ extension RMEpisodeListViewViewModel: UIScrollViewDelegate{
             let totalContentHeight = scrollView.contentSize.height
             let totalScrollViewFixedHeight = scrollView.frame.size.height
             
-            if offset >= (totalContentHeight - totalScrollViewFixedHeight - 120) {
+            if offset >= (totalContentHeight - totalScrollViewFixedHeight - 120){
                 self?.fetchAdditionalEpisodes(url: url)
             }
             t.invalidate()
         }
-        
     }
 }

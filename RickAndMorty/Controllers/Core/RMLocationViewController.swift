@@ -8,9 +8,10 @@
 import UIKit
 
 /// Controller to show and search for Locations
-final class RMLocationViewController: UIViewController, RMLocationListViewDelegate {
-    
+final class RMLocationViewController: UIViewController, RMLocationListViewViewModelDelegate, RMLocationListViewDelegate{
+   
     private let locationListView = RMLocationListView()
+    private let viewModel = RMLocationListViewViewModel()
 
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -20,6 +21,9 @@ final class RMLocationViewController: UIViewController, RMLocationListViewDelega
         
         setUpView()
         addSearchButton()
+        locationListView.delegate = self
+        viewModel.delegate = self
+        viewModel.fetchLocations()
     }
     
     private func addSearchButton() {
@@ -40,13 +44,16 @@ final class RMLocationViewController: UIViewController, RMLocationListViewDelega
         
     }
     
-    func rmLocationView(_ locationListView: RMLocationListView, didSelectLocation location: RMLocation) {
-        let detailVC = RMLocationDetailViewController()
-        detailVC.navigationItem.largeTitleDisplayMode = .never
-        navigationController?.pushViewController(detailVC, animated: true)
+    func didFetchInitialLocations() {
+        locationListView.configure(with: viewModel)
     }
     
-
-
+    func rmLocationView(_ locationView: RMLocationListView, didSelect location: RMLocation) {
+        let vc = RMLocationDetailViewController(location: location)
+        vc.navigationItem.largeTitleDisplayMode = .never
+        navigationController?.pushViewController(vc, animated: true)
+    }
 
 }
+
+

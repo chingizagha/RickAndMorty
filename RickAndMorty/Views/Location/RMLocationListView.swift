@@ -1,103 +1,154 @@
-//
-//  RMLocationListView.swift
-//  RickAndMorty
-//
-//  Created by Chingiz on 11.02.24.
-//
 
 import UIKit
 
-protocol RMLocationListViewDelegate: AnyObject{
-    func rmLocationView(
-        _ locationListView: RMLocationListView,
-        didSelectLocation location: RMLocation
-    )
+/// Interface to relay location view events
+protocol RMLocationListViewDelegate: AnyObject {
+    func rmLocationView(_ locationView: RMLocationListView, didSelect location: RMLocation)
 }
 
 final class RMLocationListView: UIView {
-    
+
     public weak var delegate: RMLocationListViewDelegate?
 
-    private let viewModel = RMLocationListViewViewModel()
-    
+    private var viewModel: RMLocationListViewViewModel? {
+        didSet {
+            spinner.stopAnimating()
+            tableView.isHidden = false
+            tableView.reloadData()
+            UIView.animate(withDuration: 0.3) {
+                self.tableView.alpha = 1
+            }
+
+            viewModel?.registerDidFinishPaginationBlock { [weak self] in
+                DispatchQueue.main.async {
+                    // Loading indicator go bye bye
+                    self?.tableView.tableFooterView = nil
+                    // Reload data
+                    self?.tableView.reloadData()
+                }
+            }
+        }
+    }
+
+    private let tableView: UITableView = {
+        let table = UITableView(frame: .zero, style: .grouped)
+        table.translatesAutoresizingMaskIntoConstraints = false
+        table.alpha = 0
+        table.isHidden = true
+        table.register(RMLocationTableViewCell.self,
+                       forCellReuseIdentifier: RMLocationTableViewCell.cellIdentifier)
+        return table
+    }()
+
     private let spinner: UIActivityIndicatorView = {
-        let spinner = UIActivityIndicatorView(style: .large)
-        spinner.hidesWhenStopped = true
+        let spinner = UIActivityIndicatorView()
         spinner.translatesAutoresizingMaskIntoConstraints = false
+        spinner.hidesWhenStopped = true
         return spinner
     }()
-    
-    private let collectinView: UICollectionView = {
-        let layout = UICollectionViewFlowLayout()
-        let collectionView = UICollectionView(frame: .zero, collectionViewLayout: layout)
-        layout.scrollDirection = .vertical
-        layout.sectionInset = UIEdgeInsets(top: 10, left: 10, bottom: 10, right: 10)
-        collectionView.isHidden = true
-        collectionView.alpha = 0
-        collectionView.translatesAutoresizingMaskIntoConstraints = false
-        collectionView.register(UICollectionViewCell.self, forCellWithReuseIdentifier: "cell")
-        collectionView.register(RMLocationCollectionViewCell.self, forCellWithReuseIdentifier: RMLocationCollectionViewCell.cellIdentifier)
-        
-        collectionView.register(RMFooterLoadingCollectionReusableView.self, forSupplementaryViewOfKind: UICollectionView.elementKindSectionFooter, withReuseIdentifier: RMFooterLoadingCollectionReusableView.identifier)
-        return collectionView
-    }()
-    
+
+    // MARK: - Init
+
     override init(frame: CGRect) {
         super.init(frame: frame)
+        backgroundColor = .systemBackground
         translatesAutoresizingMaskIntoConstraints = false
-        addSubviews(collectinView, spinner)
-        addConstraints()
-        
+        addSubviews(tableView, spinner)
         spinner.startAnimating()
-        viewModel.delegate = self
-        viewModel.fetchLocation()
-        setUpCollectionView()
+        addConstraints()
+        configureTable()
     }
-    
+
     required init?(coder: NSCoder) {
-        fatalError("Unsupported")
+        fatalError()
     }
-    
+
+    private func configureTable() {
+        tableView.delegate = self
+        tableView.dataSource = self
+    }
+
     private func addConstraints() {
         NSLayoutConstraint.activate([
-            spinner.widthAnchor.constraint(equalToConstant: 100),
             spinner.heightAnchor.constraint(equalToConstant: 100),
+            spinner.widthAnchor.constraint(equalToConstant: 100),
             spinner.centerXAnchor.constraint(equalTo: centerXAnchor),
             spinner.centerYAnchor.constraint(equalTo: centerYAnchor),
-            
-            collectinView.topAnchor.constraint(equalTo: topAnchor),
-            collectinView.rightAnchor.constraint(equalTo: rightAnchor),
-            collectinView.leftAnchor.constraint(equalTo: leftAnchor),
-            collectinView.bottomAnchor.constraint(equalTo: bottomAnchor)
+
+            tableView.topAnchor.constraint(equalTo: topAnchor),
+            tableView.leftAnchor.constraint(equalTo: leftAnchor),
+            tableView.rightAnchor.constraint(equalTo: rightAnchor),
+            tableView.bottomAnchor.constraint(equalTo: bottomAnchor),
         ])
     }
-    
-    private func setUpCollectionView() {
-        collectinView.dataSource = viewModel
-        collectinView.delegate = viewModel
+
+    public func configure(with viewModel: RMLocationListViewViewModel) {
+        self.viewModel = viewModel
     }
 }
 
-extension RMLocationListView: RMLocationListViewViewModelDelegate{
-    
-    func didLoadInitialLocations() {
-        self.spinner.stopAnimating()
-        self.collectinView.isHidden = false
-        collectinView.reloadData()
-        UIView.animate(withDuration: 0.3) {
-            self.collectinView.alpha = 1
+// MARK: - UITableViewDelegate
+
+extension RMLocationListView: UITableViewDelegate {
+    func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+        tableView.deselectRow(at: indexPath, animated: true)
+        guard let locationModel = viewModel?.location(at: indexPath.row) else {
+            print("aa")
+            return
+        }
+        delegate?.rmLocationView(self,  didSelect: locationModel)
+    }
+}
+
+// MARK: - UITableViewDataSource
+
+extension RMLocationListView: UITableViewDataSource {
+    func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
+        return viewModel?.cellViewModels.count ?? 0
+    }
+
+    func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
+        guard let cellViewModels = viewModel?.cellViewModels else {
+            fatalError()
+        }
+        guard let cell = tableView.dequeueReusableCell(
+            withIdentifier: RMLocationTableViewCell.cellIdentifier,
+            for: indexPath
+        ) as? RMLocationTableViewCell else {
+            fatalError()
+        }
+        let cellViewModel = cellViewModels[indexPath.row]
+        cell.configure(with: cellViewModel)
+        return cell
+    }
+}
+
+// MARK: - UIScrollViewDelegate
+
+extension RMLocationListView: UIScrollViewDelegate {
+    func scrollViewDidScroll(_ scrollView: UIScrollView) {
+        guard let viewModel = viewModel,
+              !viewModel.cellViewModels.isEmpty,
+              viewModel.shouldShowLoadMoreIndicator,
+              !viewModel.isLoadingMoreLocations else {
+            return
+        }
+
+        Timer.scheduledTimer(withTimeInterval: 0.2, repeats: false) { [weak self] t in
+            let offset = scrollView.contentOffset.y
+            let totalContentHeight = scrollView.contentSize.height
+            let totalScrollViewFixedHeight = scrollView.frame.size.height
+
+            if offset >= (totalContentHeight - totalScrollViewFixedHeight - 120) {
+                self?.showLoadingIndicator()
+                viewModel.fetchAdditionalLocations()
+            }
+            t.invalidate()
         }
     }
-    
-    func didLoadMoreLocations(with newIndexPaths: [IndexPath]) {
-        collectinView.performBatchUpdates {
-            self.collectinView.insertItems(at: newIndexPaths)
-        }
+
+    private func showLoadingIndicator() {
+        let footer = RMTableLoadingFooterView(frame: CGRect(x: 0, y: 0, width: frame.size.width, height: 100))
+        tableView.tableFooterView = footer
     }
-    
-    func didSelectLocation(_ location: RMLocation) {
-        delegate?.rmLocationView(self, didSelectLocation: location)
-    }
-    
-    
 }

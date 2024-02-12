@@ -78,7 +78,6 @@ final class RMEpisodeDetailViewViewModel {
         RMService.shared.execute(request, expecting: RMEpisode.self) {[weak self] result in
             switch result {
             case .success(let model):
-                
                 self?.fetchRelatedCharacter(episode: model)
             case .failure(let error):
                 print(String(describing: error))

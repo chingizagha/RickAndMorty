@@ -13,6 +13,7 @@ struct RMSettingsView: View {
     
     init(viewModel: RMSettingsViewViewModel) {
         self.viewModel = viewModel
+        
     }
     
     

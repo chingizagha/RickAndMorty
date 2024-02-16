@@ -21,6 +21,28 @@ final class RMSearchViewController: UIViewController {
             case episode
             case location
             
+            var endpoint: RMEndpoint{
+                switch self{
+                case .character:
+                    return .character
+                case .episode:
+                    return .episode
+                case .location:
+                    return .location
+                }
+            }
+            
+            var searchResultResponseType: Any.Type{
+                switch self {
+                case .character:
+                    return RMGetAllCharactersResponse.self
+                case .episode:
+                    return RMGetAllLocationsResponse.self
+                case .location:
+                    return RMGetAllLocationsResponse.self
+                }
+            }
+            
             var title: String{
                 switch self{
                 case .character:
@@ -34,6 +56,7 @@ final class RMSearchViewController: UIViewController {
         }
         
         let type: `Type`
+        
     }
     
     
@@ -79,7 +102,11 @@ final class RMSearchViewController: UIViewController {
 
 extension RMSearchViewController: RMSearchViewDelegate{
     func rmSearchView(_ searchView: RMSearchView, didSelectOption option: RMSearchInputViewViewModel.DynamicOption) {
-        let vc = RMSearchOptionPickerViewController()
+        let vc = RMSearchOptionPickerViewController(option: option) { [weak self] selection in
+            DispatchQueue.main.async {
+                self?.viewModel.set(value: selection, for: option)
+            }
+        }
         vc.sheetPresentationController?.detents = [.medium()]
         vc.sheetPresentationController?.prefersGrabberVisible = true
         present(vc, animated: true)

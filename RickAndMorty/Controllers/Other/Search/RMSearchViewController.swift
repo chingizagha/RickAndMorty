@@ -87,7 +87,7 @@ final class RMSearchViewController: UIViewController {
     }
     
     @objc private func didTapExecuteSearch() {
-        
+        viewModel.executeSearch()
     }
     
     private func addConstraints(){
@@ -110,6 +110,12 @@ extension RMSearchViewController: RMSearchViewDelegate{
         vc.sheetPresentationController?.detents = [.medium()]
         vc.sheetPresentationController?.prefersGrabberVisible = true
         present(vc, animated: true)
+    }
+    
+    func rmSearchView(_ searchView: RMSearchView, didSelectLocation location: RMLocation) {
+        let vc = RMLocationDetailViewController(location: location)
+        vc.navigationItem.largeTitleDisplayMode = .never
+        navigationController?.pushViewController(vc, animated: true)
     }
     
     

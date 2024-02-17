@@ -9,6 +9,7 @@ import UIKit
 
 protocol RMSearchViewDelegate: AnyObject{
     func rmSearchView(_ searchView: RMSearchView, didSelectOption option: RMSearchInputViewViewModel.DynamicOption)
+    func rmSearchView(_ searchView: RMSearchView, didSelectLocation location: RMLocation)
 }
 
 final class RMSearchView: UIView {
@@ -20,30 +21,50 @@ final class RMSearchView: UIView {
     private let searchInputView = RMSearchInputView()
     
     private let noResultsView = RMNoSearchResultsView()
+    
+    private let resultView = RMSearchResultView()
 
     init(frame: CGRect, viewModel: RMSearchViewViewModel) {
         self.viewModel = viewModel
         super.init(frame: frame)
         backgroundColor = .systemBackground
         translatesAutoresizingMaskIntoConstraints = false
-        addSubviews(noResultsView, searchInputView)
+        addSubviews(noResultsView, searchInputView, resultView)
         addConstraints()
         searchInputView.configure(with: .init(type: viewModel.config.type))
         searchInputView.delegate = self
         
-        viewModel.registerOptionChangeBlock { tuple in
-            self.searchInputView.update(option: tuple.0, value: tuple.1)
-        }
+        setUpHandlers(viewModel: viewModel)
         
-        viewModel.registerSearchResultHandler { results in
-            print(results)
-        }
-        
+        resultView.delegate = self
     }
     
         
     required init?(coder: NSCoder) {
         fatalError("Unsupported")
+    }
+    
+    private func setUpHandlers(viewModel: RMSearchViewViewModel){
+        viewModel.registerOptionChangeBlock { tuple in
+            self.searchInputView.update(option: tuple.0, value: tuple.1)
+        }
+        
+        viewModel.registerSearchResultHandler { [weak self] results in
+            DispatchQueue.main.async {
+                self?.resultView.configure(with: results)
+                self?.noResultsView.isHidden = true
+                self?.resultView.isHidden = false
+            }
+        }
+        
+        viewModel.registerNoResultHandler { [weak self] in
+            DispatchQueue.main.async {
+                self?.noResultsView.isHidden = false
+                self?.resultView.isHidden = true
+            }
+            
+        }
+
     }
     
     private func addConstraints(){
@@ -56,6 +77,12 @@ final class RMSearchView: UIView {
             
             
             // No Results View
+            resultView.leftAnchor.constraint(equalTo: leftAnchor),
+            resultView.rightAnchor.constraint(equalTo: rightAnchor),
+            resultView.topAnchor.constraint(equalTo: searchInputView.bottomAnchor),
+            resultView.bottomAnchor.constraint(equalTo: bottomAnchor),
+            
+            // Results View
             noResultsView.widthAnchor.constraint(equalToConstant: 150),
             noResultsView.heightAnchor.constraint(equalToConstant: 150),
             noResultsView.centerXAnchor.constraint(equalTo: centerXAnchor),
@@ -102,4 +129,14 @@ extension RMSearchView: RMSearchInputViewDelegate{
     func rmSearchInputViewDidTapSearchKeyboardButton(_ inputView: RMSearchInputView) {
         viewModel.executeSearch()
     }
+}
+
+extension RMSearchView: RMSearchResultViewDelegate {
+    func rmSearchResultView(_ resultsView: RMSearchResultView, didTapLocationAt index: Int) {
+        print()
+        guard let locationModel = viewModel.locationSearhResult(at: index) else {return}
+        delegate?.rmSearchView(self, didSelectLocation: locationModel)
+    }
+    
+    
 }

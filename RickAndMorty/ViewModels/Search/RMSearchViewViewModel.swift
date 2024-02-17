@@ -18,6 +18,10 @@ final class RMSearchViewViewModel {
     
     private var searchResultHandler: ((RMSearchResultViewModel) -> Void)?
     
+    private var noResultHandler: (() -> Void)?
+    
+    private var searchResultModel: Codable?
+    
     
     init(config: RMSearchViewController.Config){
         self.config = config
@@ -25,6 +29,10 @@ final class RMSearchViewViewModel {
     
     public func registerSearchResultHandler(_ block: @escaping (RMSearchResultViewModel) -> Void){
         self.searchResultHandler = block
+    }
+    
+    public func registerNoResultHandler(_ block: @escaping () -> Void){
+        self.noResultHandler = block
     }
     
     public func executeSearch() {
@@ -67,7 +75,7 @@ final class RMSearchViewViewModel {
             case .success(let model):
                 self?.processSearchResult(model: model)
             case .failure(let error):
-                print(error)
+                self?.handleNoResult()
                 break
             }
         }
@@ -94,10 +102,15 @@ final class RMSearchViewViewModel {
             }))
         }
         if let results = resultsVM {
+            self.searchResultModel = model
             self.searchResultHandler?(results)
         } else {
-            
+            handleNoResult()
         }
+    }
+    
+    private func handleNoResult(){
+            noResultHandler?()
     }
     
     
@@ -114,4 +127,10 @@ final class RMSearchViewViewModel {
     public func registerOptionChangeBlock(_ block: @escaping ((RMSearchInputViewViewModel.DynamicOption, String)) -> Void){
         self.optionMapUpdateBlock = block
     }
+    
+    public func locationSearhResult(at index: Int) -> RMLocation?{
+        guard let searchModel = searchResultModel as? RMGetAllLocationsResponse else {return nil}
+        return searchModel.results[index]
+    }
+    
 }

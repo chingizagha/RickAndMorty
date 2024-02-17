@@ -52,6 +52,7 @@
 		72B4CFC42B7A24A600CBCFF6 /* RMSettingsOption.swift in Sources */ = {isa = PBXBuildFile; fileRef = 72B4CFC32B7A24A600CBCFF6 /* RMSettingsOption.swift */; };
 		72B4CFC72B7A28A800CBCFF6 /* RMSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 72B4CFC62B7A28A800CBCFF6 /* RMSettingsView.swift */; };
 		72B650652B7F7974002CD35F /* RMSearchResultViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 72B650642B7F7974002CD35F /* RMSearchResultViewModel.swift */; };
+		72B7ED942B80FE9900C1D9CF /* RMSearchResultView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 72B7ED932B80FE9900C1D9CF /* RMSearchResultView.swift */; };
 		72BAC5E32B7E364E001D6918 /* RMSearchOptionPickerViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 72BAC5E22B7E364E001D6918 /* RMSearchOptionPickerViewController.swift */; };
 		72BCD7832B65633E00EC2C2B /* RMOrigin.swift in Sources */ = {isa = PBXBuildFile; fileRef = 72BCD7822B65633E00EC2C2B /* RMOrigin.swift */; };
 		72BCD7852B65641400EC2C2B /* RMSingleLocation.swift in Sources */ = {isa = PBXBuildFile; fileRef = 72BCD7842B65641400EC2C2B /* RMSingleLocation.swift */; };
@@ -127,6 +128,7 @@
 		72B4CFC32B7A24A600CBCFF6 /* RMSettingsOption.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RMSettingsOption.swift; sourceTree = "<group>"; };
 		72B4CFC62B7A28A800CBCFF6 /* RMSettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RMSettingsView.swift; sourceTree = "<group>"; };
 		72B650642B7F7974002CD35F /* RMSearchResultViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RMSearchResultViewModel.swift; sourceTree = "<group>"; };
+		72B7ED932B80FE9900C1D9CF /* RMSearchResultView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RMSearchResultView.swift; sourceTree = "<group>"; };
 		72BAC5E22B7E364E001D6918 /* RMSearchOptionPickerViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RMSearchOptionPickerViewController.swift; sourceTree = "<group>"; };
 		72BCD7822B65633E00EC2C2B /* RMOrigin.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RMOrigin.swift; sourceTree = "<group>"; };
 		72BCD7842B65641400EC2C2B /* RMSingleLocation.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RMSingleLocation.swift; sourceTree = "<group>"; };
@@ -215,6 +217,7 @@
 				722651C32B7BED5E00C898EC /* RMSearchView.swift */,
 				722651C82B7BEF9B00C898EC /* RMNoSearchResultsView.swift */,
 				722651CC2B7BEFE400C898EC /* RMSearchInputView.swift */,
+				72B7ED932B80FE9900C1D9CF /* RMSearchResultView.swift */,
 			);
 			path = Search;
 			sourceTree = "<group>";
@@ -601,6 +604,7 @@
 				72DEBAED2B6556650099A5FB /* RMService.swift in Sources */,
 				72A850AD2B6538C6005F23A6 /* RMCharacter.swift in Sources */,
 				722651CF2B7BF00700C898EC /* RMSearchInputViewViewModel.swift in Sources */,
+				72B7ED942B80FE9900C1D9CF /* RMSearchResultView.swift in Sources */,
 				72DEBAF12B6557490099A5FB /* RMEndpoint.swift in Sources */,
 				72BAC5E32B7E364E001D6918 /* RMSearchOptionPickerViewController.swift in Sources */,
 				722ADDE92B7657950076D518 /* RMEpisodeDetailViewController.swift in Sources */,

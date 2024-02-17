@@ -10,7 +10,7 @@ import UIKit
 class RMTableLoadingFooterView: UIView {
 
     private let spinner: UIActivityIndicatorView = {
-           let spinner = UIActivityIndicatorView()
+        let spinner = UIActivityIndicatorView(style: .large)
            spinner.translatesAutoresizingMaskIntoConstraints = false
            spinner.hidesWhenStopped = true
            return spinner
